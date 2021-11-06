@@ -7,7 +7,7 @@
 git clone https://github.com/himkt/acl-anthology.git
 cd acl-anthology
 poetry install
-poetry run python script/to_csv.py acl 2020
+poetry run python script/to_csv.py --conference acl --year 2020
 ```
 
 
