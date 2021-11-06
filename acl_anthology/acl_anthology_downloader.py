@@ -1,3 +1,4 @@
+from logging import getLogger
 from typing import Dict
 import xml.etree.ElementTree as etree
 
@@ -5,14 +6,35 @@ import pandas
 import requests
 
 
+logger = getLogger(__file__)
+
+
 class AclAnthologyDownloader:
+    ACL_ANTHOLOGY_HOMEPAGE_URL = "https://www.aclweb.org/anthology/{path}"
     ACL_ANTHOLOGY_DATA_URL = (
         "https://raw.githubusercontent.com"
         "/acl-org/acl-anthology/master/data/xml/{year}.{conference}.xml"
     )
-    ACL_ANTHOLOGY_HOMEPAGE_URL = "https://www.aclweb.org/anthology/{path}"
+    OLD_ACL_ANTHOLOGY_DATA_URL = (
+        "https://raw.githubusercontent.com"
+        "/acl-org/acl-anthology/master/data/xml/{conference}{year}.xml"
+    )
+    CHARACTER_TO_CONFERENCE = {
+        "acl": "P",
+        "anlp": "A",
+        "cl": "J",
+        "conll": "K",
+        "eacl": "E",
+        "emnlp": "D",
+        "naacl": "N",
+        "semeval": "S",
+        "starsem": "S",
+        "tacl": "Q",
+        "wmt": "W",
+        "coling": "C",
+        "ijcnlp": "I",
+    }
     OUTPUT_FILE_NAME = "{conference}.{year}.csv"
-
 
     def __init__(self, conference: str, year: int) -> None:
         self._conference = conference
@@ -29,7 +51,14 @@ class AclAnthologyDownloader:
         )
 
     def _fetch(self, conference: str, year: int) -> pandas.DataFrame:
-        url = self.ACL_ANTHOLOGY_DATA_URL.format(conference=conference, year=year)
+        if year <= 2019:
+            old_conference = self.CHARACTER_TO_CONFERENCE[conference]
+            old_year = year % 100  # NOTE: 2017 -> 17
+            url = self.OLD_ACL_ANTHOLOGY_DATA_URL.format(conference=old_conference, year=old_year)
+        else:
+            url = self.ACL_ANTHOLOGY_DATA_URL.format(conference=conference, year=year)
+
+        logger.info(f"URL: {url}")
         response = requests.get(url)
         tree = etree.fromstring(response.content)
         data = pandas.DataFrame([self._parse_child(paper) for paper in tree.findall("./volume/paper")])
