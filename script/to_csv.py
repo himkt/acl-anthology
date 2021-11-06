@@ -29,7 +29,7 @@ def parse_child(element: 'xml.etree.ElementTree.Element') -> Dict[str, str]:
             # ref. https://www.aclweb.org/anthology/2020.acl-main.521/
             #
             author_dict = {t.tag: t.text for t in tag}
-            author_name = " ".join(author_dict.get("first", ""), author_dict.get("last", ""))
+            author_name = (author_dict.get("first") or "") + (author_dict.get("last") or "")
             body["authors"].append(author_name)
             
         if tag.tag == "url":
