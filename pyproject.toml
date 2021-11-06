@@ -8,7 +8,6 @@ authors = ["himkt <himkt@klis.tsukuba.ac.jp>"]
 python = "^3.9"
 pandas = "^1.3.4"
 requests = "^2.26.0"
-typer = "^0.4.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
